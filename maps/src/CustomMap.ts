@@ -1,8 +1,6 @@
 export interface Mappable {
-    location: {
-        lat: number;
-        lng: number;
-    };
+    location: google.maps.LatLngLiteral;
+    colour?: string;
     content(): string;
 }
 
@@ -20,9 +18,13 @@ export class CustomMap {
     }
 
     addMarker(mappable: Mappable): void {
+        let url = 'http://maps.google.com/mapfiles/ms/icons/';
+        url += (mappable.colour ? mappable.colour : 'red') + '-dot.png';    
+
         const marker = new google.maps.Marker({
             map: this.googleMap,
-            position: mappable.location
+            position: mappable.location,
+            icon: url
         });
 
         marker.addListener('click', () => {
