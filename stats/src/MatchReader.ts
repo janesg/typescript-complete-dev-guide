@@ -1,11 +1,10 @@
+import { MatchData } from './MatchData';
 import { MatchResult } from './MatchResult';
 import { dateStrToDate } from './utils';
 
 interface MatchDataReader {
     read(): MatchData[];
 }
-
-export type MatchData = [Date, string, string, number, number, MatchResult, string];
 
 export const matchRowMapper = (values: string[]): MatchData => {
     return [
