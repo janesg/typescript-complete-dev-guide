@@ -1,63 +1,69 @@
-import axios, { AxiosResponse } from 'axios';
+import { AxiosResponse } from 'axios';
+import { Attributes } from './Attributes';
+import { EventManager } from './EventManager';
+import { SyncManager, HasOptionalIdentity } from './SyncManager';
 
-const baseUrl = 'http://localhost:3000';
-
-interface UserProps {
+interface UserProps extends HasOptionalIdentity {
     id?: number;
     name?: string;
     age?: number;
 }
 
-// Create a type alias for callback function that returns void
-type Callback = () => void;
+const baseUrl = 'http://localhost:3000/users';
 
 export class User {
-    private eventMap = new Map<string, Callback[]>();
+    private attrs: Attributes<UserProps>;
+    private syncManager = new SyncManager<UserProps>(baseUrl);
 
-    constructor(private data: UserProps) {}
+    // Use argument default to provide a default EventAware implementation
+    constructor(data: UserProps, private eventAware = new EventManager()) {
+        this.attrs = new Attributes<UserProps>(data);
+    }
 
-    get(propName: string): (string | number) {
-        return this.data[propName];
+    // Rather than using a passthrough of params to call the target function, 
+    // we instead use a getter to return the target function itself
+    get on() {
+        return this.eventAware.on;
+    }
+
+    get trigger() {
+        return this.eventAware.trigger;
+    }
+
+    get get() {
+        return this.attrs.get;
     }
 
     set(updates: UserProps): void {
-        // Overwrite first object with second object
-        Object.assign(this.data, updates);
-    }
-
-    on(eventName: string, callback: Callback): void {
-        const callbacks = this.eventMap.get(eventName) || [];
-        this.eventMap.set(eventName, [...callbacks, callback]);
-    }
-
-    trigger(eventName: string): void {
-        const callbacks = this.eventMap.get(eventName) || [];
-        callbacks.forEach(cb => cb());
+        this.attrs.set(updates);
+        this.eventAware.trigger('change');
     }
 
     fetch(): void {
-        axios.get(`${baseUrl}/users/${this.get('id')}`)
+        // Get this user's id... has to have been saved already
+        const id = this.attrs.get('id');
+
+        if (typeof id !== 'number') {
+            throw new Error('Unable to fetch user without an id');
+        }
+
+        this.syncManager.fetch(id)
             .then((response: AxiosResponse): void => {
+                // Use this class's method so that 'change' event is triggered
                 this.set(response.data);
-            }
-        );
+            })
+            .catch(() => {
+                this.eventAware.trigger('error');
+            });
     }
 
     save(): void {
-        const id = this.get('id');
-
-        if (id) {
-            axios.put(`${baseUrl}/users/${id}`, this.data)
-                .then((response: AxiosResponse): void => {
-                    this.set(response.data);
-                }
-            );
-        } else {
-            axios.post(`${baseUrl}/users`, this.data)
-                .then((response: AxiosResponse): void => {
-                    this.set(response.data);
-                }
-            );
-        }
+        this.syncManager.save(this.attrs.getAll())
+            .then((response: AxiosResponse): void => {
+                this.eventAware.trigger('save');
+            })
+            .catch(() => {
+                this.eventAware.trigger('error');
+            });
     }
 }
