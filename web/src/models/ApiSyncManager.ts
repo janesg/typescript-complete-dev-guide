@@ -1,10 +1,7 @@
 import axios, { AxiosPromise } from 'axios';
+import { HasOptionalIdentity, SyncAware } from './Model';
 
-export interface HasOptionalIdentity {
-    id?: number;
-}
-
-export class SyncManager<T extends HasOptionalIdentity> {
+export class ApiSyncManager<T extends HasOptionalIdentity> implements SyncAware<T> {
     constructor(private baseUrl: string) {}
 
     fetch(id : number): AxiosPromise {

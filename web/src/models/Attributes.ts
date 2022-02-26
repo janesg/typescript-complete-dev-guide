@@ -1,4 +1,6 @@
-export class Attributes<T> {
+import { ModelAttributes } from './Model';
+
+export class Attributes<T> implements ModelAttributes<T> {
     constructor(private data: T) {}
 
     // Generic key constraint means that K can only ever be one of the keys of T
