@@ -3,21 +3,21 @@ import { Attributes } from './Attributes';
 import { EventManager } from './EventManager';
 import { EventAware, Model, SyncAware } from './Model';
 
-interface UserProps {
+export interface UserData {
     id?: number;
     name?: string;
     age?: number;
 }
 
-const baseUrl = 'http://localhost:3000/users';
+export class User extends Model<UserData> {
+    public static baseUrl = 'http://localhost:3000/users';
 
-export class User extends Model<UserProps> {
     // Use parameter defaults to create default implementations if none provided
     constructor(
-        data: UserProps, 
+        data: UserData, 
         eventAware: EventAware = new EventManager(), 
-        syncAware: SyncAware<UserProps> = new ApiSyncManager<UserProps>(baseUrl)) {
+        syncAware: SyncAware<UserData> = new ApiSyncManager<UserData>(User.baseUrl)) {
 
-        super(new Attributes<UserProps>(data), eventAware, syncAware);
+        super(new Attributes<UserData>(data), eventAware, syncAware);
     }
 }

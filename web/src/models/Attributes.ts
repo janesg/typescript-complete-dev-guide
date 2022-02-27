@@ -11,12 +11,12 @@ export class Attributes<T> implements ModelAttributes<T> {
         return this.data[key];
     }
 
-    set(updates: T): void {
+    set = (updates: T): void => {
         // Overwrite first object with second object
         Object.assign(this.data, updates);
     }
 
-    getAll(): T {
+    getData = (): T => {
         return this.data;
     }
 }

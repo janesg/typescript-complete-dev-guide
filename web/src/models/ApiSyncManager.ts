@@ -8,6 +8,10 @@ export class ApiSyncManager<T extends HasOptionalIdentity> implements SyncAware<
         return axios.get(`${this.baseUrl}/${id}`);
     }
 
+    fetchAll(): AxiosPromise {
+        return axios.get(`${this.baseUrl}`);
+    }
+
     save(data: T): AxiosPromise {
         // Destructure the id from the data
         const { id } = data;

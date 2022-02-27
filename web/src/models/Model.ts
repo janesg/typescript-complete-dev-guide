@@ -2,12 +2,13 @@ import { AxiosPromise, AxiosResponse } from 'axios';
 
 export interface ModelAttributes<T> {
     get<K extends keyof T>(key: K): T[K];
-    getAll(): T;
+    getData(): T;
     set(updates: T): void;
 }
 
 export interface SyncAware<T> {
     fetch(id : number): AxiosPromise;
+    fetchAll(): AxiosPromise;
     save(data: T): AxiosPromise;
 }
 
@@ -41,13 +42,17 @@ export abstract class Model<T extends HasOptionalIdentity> {
     trigger = this.eventAware.trigger;
     get = this.attrs.get;
 
+    get data() {
+        return this.attrs.getData();
+    }
+
     set(updates: T): void {
         this.attrs.set(updates);
         this.eventAware.trigger('change');
     }
 
     fetch(): void {
-        // Get this user's id... has to have been saved already
+        // Get this user's id... only has one if it's been saved already
         const id = this.attrs.get('id');
 
         if (typeof id !== 'number') {
@@ -65,7 +70,7 @@ export abstract class Model<T extends HasOptionalIdentity> {
     }
 
     save(): void {
-        this.syncAware.save(this.attrs.getAll())
+        this.syncAware.save(this.attrs.getData())
             .then((response: AxiosResponse): void => {
                 this.eventAware.trigger('save');
             })
