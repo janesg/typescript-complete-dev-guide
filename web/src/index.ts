@@ -2,7 +2,9 @@ import { ApiSyncManager } from './models/ApiSyncManager';
 import { Collection } from './models/Collection';
 import { EventManager } from './models/EventManager';
 import { User, UserData } from './models/User';
+import { UserEdit } from './views/UserEdit';
 import { UserForm } from './views/UserForm';
+import { UserList } from './views/UserList';
 
 const populateUsers = (): void => {
     const gary = new User({ name: 'Gary', age: 56 });
@@ -30,13 +32,6 @@ const userSyncAware = new ApiSyncManager<UserData>(User.baseUrl);
 const userMapper = (userData: UserData) => new User(userData, eventAware, userSyncAware);
 const users = new Collection<User, UserData>(eventAware, userSyncAware, userMapper);
 
-users.on('change', () => {
-    console.log('Received notification that user collection has changed');
-    users.data.forEach((user: User) => {
-        const { id, name, age } = user.data;
-        console.log(`User - id: ${id}, name: ${name}, age: ${age}\n`)
-    });
-})
 console.log('Fetching users...');
 users.fetch();
 console.log('Users fetched');
@@ -47,7 +42,17 @@ if (!rootElement) {
     throw new Error('Root element is missing');
 }
 
-const bob =  new User({ 'name': 'Bob Bobbins', 'age': 66 }, eventAware, userSyncAware);
-const userForm = new UserForm(rootElement, bob);
+// const bob =  new User({ 'name': 'Bob Bobbins', 'age': 66 }, eventAware, userSyncAware);
+// const userEdit = new UserEdit(rootElement, bob);
 
-userForm.render();
+// userEdit.render();
+
+users.on('change', () => {
+    console.log('Received notification that user collection has changed');
+    users.data.forEach((user: User) => {
+        const { id, name, age } = user.data;
+        console.log(`User - id: ${id}, name: ${name}, age: ${age}\n`)
+    });
+    new UserList(rootElement, users).render();
+})
+

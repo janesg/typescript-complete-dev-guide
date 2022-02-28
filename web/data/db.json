@@ -9,6 +9,16 @@
       "name": "Enid",
       "age": 27,
       "id": 2
+    },
+    {
+      "name": "Bob Bobbins",
+      "age": 5,
+      "id": 3
+    },
+    {
+      "name": "Jim Jobbins",
+      "age": 42,
+      "id": 4
     }
   ]
 }

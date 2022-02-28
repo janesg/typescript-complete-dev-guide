@@ -1,29 +1,14 @@
+import { View } from './View';
 import { User } from '../models/User';
 
-export class UserForm {
-    constructor(private parent: HTMLElement, private model: User) {
-        this.bindModel();
-    };
-
-    bindModel() {
-        this.model.on('change', () => this.render())
-    }
-
-    eventMap = (): Map<string, () => void> => {
+export class UserForm extends View<User> {
+    
+    eventCallbackMap = (): Map<string, () => void> => {
         return new Map<string, () => void>([
-            ['click:button', this.onButtonClick],
-            ['mouseenter:h1', this.onHeaderHover],
             ['click:#set-name', this.onSetNameClick],
             ['click:#set-age', this.onSetAgeClick],
+            ['click:#save-model', this.onSaveModelClick]
         ]);
-    }
-
-    onButtonClick = (): void => {
-        console.log('You clicked a button');
-    }
-
-    onHeaderHover = (): void => {
-        console.log('You hovered on the H1 header');
     }
 
     onSetNameClick = (): void => {
@@ -41,36 +26,18 @@ export class UserForm {
         this.model.set({ 'age': newAge });
     }
 
+    onSaveModelClick = (): void => {
+        this.model.save();
+    }
+
     template = (): string => {
         return `
             <div>
-                <h1>User Form</h1>
-                <div>User: ${this.model.get('name')}</div>
-                <div>Age: ${this.model.get('age')}</div>
-                <input />
+                <input placeholder="${this.model.get('name')}"/>
                 <button id="set-name">Set Name</button>
                 <button id="set-age">Set Random Age</button>
+                <button id="save-model">Save</button>
             </div>
         `;
-    }
-
-    bindEvents = (fragment: DocumentFragment): void => {
-        this.eventMap().forEach((value, key) => {
-            // Destructuring the returned array
-            const [eventName, selector] = key.split(':');
-            fragment.querySelectorAll(selector).forEach(element => {
-                element.addEventListener(eventName, value);
-            });
-        });
-    }
-
-    render = (): void => {
-        // Clear any existing content...simplistic approach to updating view
-        this.parent.innerHTML = '';
-
-        const templateElem = document.createElement('template');
-        templateElem.innerHTML = this.template();
-        this.bindEvents(templateElem.content);
-        this.parent.append(templateElem.content);
     }
 }
