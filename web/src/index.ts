@@ -2,6 +2,7 @@ import { ApiSyncManager } from './models/ApiSyncManager';
 import { Collection } from './models/Collection';
 import { EventManager } from './models/EventManager';
 import { User, UserData } from './models/User';
+import { UserForm } from './views/UserForm';
 
 const populateUsers = (): void => {
     const gary = new User({ name: 'Gary', age: 56 });
@@ -39,3 +40,14 @@ users.on('change', () => {
 console.log('Fetching users...');
 users.fetch();
 console.log('Users fetched');
+
+const rootElement = document.getElementById('root');
+
+if (!rootElement) {
+    throw new Error('Root element is missing');
+}
+
+const bob =  new User({ 'name': 'Bob Bobbins', 'age': 66 }, eventAware, userSyncAware);
+const userForm = new UserForm(rootElement, bob);
+
+userForm.render();
